@@ -1,0 +1,11 @@
+[Unit]
+Description=Jboss Application Server
+After=syslog.target network.target
+
+[Service]
+Type=simple
+ExecStart=/opt/jboss/bin/standalone.sh
+ExecStop=/opt/jboss/bin/jboss-cli.sh --connect --command=:shutdown
+
+[Install]
+WantedBy=multi-user.target

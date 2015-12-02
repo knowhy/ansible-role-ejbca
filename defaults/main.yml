@@ -1,0 +1,14 @@
+---
+
+jboss_version: 7.1.1
+ejbca_version: 6_3_1_1
+
+ejbca_mysql_password: ejbca
+
+ejbca_cli_user: ejbca
+ejbca_cli_password: ejbca
+
+ejbca_password_logrounds: 1
+ejbca_ca_name: ManagementCA
+ejbca_ca_keyspec: 4096
+ejbca_ca_org: "EJBCA Sample"

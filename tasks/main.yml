@@ -1,0 +1,185 @@
+---
+
+- name: Configure MariaDB repository.
+  copy:
+    src: MariaDB.repo
+    dest: /etc/yum.repos.d/MariaDB.repo
+
+- name: Install required packages for EJBCA installation.
+  yum:
+    pkg: "{{ item }}"
+    state: installed
+  with_items:
+    - java-1.7.0
+    - ant.noarch
+    - mariadb
+    - mariadb-server
+    - mariadb-libs
+#    - MariaDB-server
+#    - MariaDB-client
+    - MySQL-python
+
+- name: Start and enable MariaDB server.
+  service:
+    name: mariadb
+    state: started
+    enabled: yes
+
+- name: Create MariaDB database for EJBCA.
+  mysql_db:
+    name: ejbca
+    state: present
+
+- name: Create MariaDB user for EJBCA.
+  mysql_user:
+    name: ejbca
+    password: ejbca
+    priv: "*.*:ALL,GRANT"
+    state: present
+
+- stat: path=/tmp/jboss-as-"{{ jboss_version }}".Final.zip
+  register: jboss_archive
+
+- name: Download JBOSS AS archive.
+  get_url:
+    url: "http://download.jboss.org/jbossas/7.1/jboss-as-{{ jboss_version }}.Final/jboss-as-{{ jboss_version }}.Final.zip"
+    dest: /tmp/
+  when: jboss_archive.stat is not defined
+
+- stat: path=/tmp/ejbca_ce_6_3_1_1.zip
+  register: ejbca_archive
+
+- name: Download EJBCA archive.
+  get_url:
+    url: http://sourceforge.net/projects/ejbca/files/ejbca6/ejbca_6_3_1_1/ejbca_ce_6_3_1_1.zip
+    dest: /tmp/
+  when: ejbca_archive.stat is not defined
+
+- name: Add JBOSS system user.
+  user:
+    name: jboss
+    system: yes
+
+- name: Unarchive JBOSS archive.
+  unarchive:
+    src: "/tmp/jboss-as-{{ jboss_version }}.Final.zip"
+    dest: /opt/
+    owner: jboss
+    group: jboss
+    creates: /opt/jboss-as-7.1.1.Final
+
+- name: Unarchive EJBCA archive.
+  unarchive:
+    src: "/tmp/ejbca_ce_6_3_1_1.zip"
+    dest: /opt/
+    owner: jboss
+    group: jboss
+    creates: /opt/ejbca_ce_6_3_1_1
+
+- name: Create symlink for /opt/jboss
+  file:
+    src: /opt/jboss-as-7.1.1.Final
+    dest: /opt/jboss
+    state: link
+    owner: jboss
+    group: jboss
+
+- name: Create symlink for /opt/ejbca
+  file:
+    src: /opt/ejbca_ce_6_3_1_1
+    dest: /opt/ejbca
+    state: link
+    owner: jboss
+    group: jboss
+
+- name: Configure install.properties.
+  template:
+    src: install.properties.j2
+    dest: /opt/ejbca/conf/install.properties
+
+- name: Configure ejbca.properties.
+  template:
+    src: ejbca.properties.j2
+    dest: /opt/ejbca/conf/ejbca.properties
+
+- name: Configure database.properties.
+  template:
+    src: database.properties.j2
+    dest: /opt/ejbca/conf/database.properties
+
+- name: Make JBOSS MariaDB Java Connector directory.
+  file:
+    path: /opt/jboss/modules/org/mariadb/main/
+    state: directory
+    recurse: yes
+
+- stat: path=/opt/jboss/modules/org/mariadb/main/mariadb-java-client-1.3.2.jar
+  register: mariadb_connector
+
+- name: Download MariaDB Java Connector.
+  get_url:
+    url: https://downloads.mariadb.com/enterprise/hvnn-wb2d/connectors/java/connector-java-1.3.2/mariadb-java-client-1.3.2.jar
+    dest: /opt/jboss/modules/org/mariadb/main/
+    validate_certs: False
+    owner: jboss
+    group: jboss
+  when: mariadb_connector.stat is not defined
+
+- name: Create JBOSS MariaDB Java Connector configuration.
+  template:
+    src: modules.xml.j2
+    dest: /opt/jboss/modules/org/mariadb/main/modules.xml
+    owner: jboss
+    group: jboss
+
+- name: Configure MariaDb connector in JBOSS.
+  template:
+    src: standalone.xml.j2
+    dest: /opt/jboss/standalone/configuration/standalone.xml
+
+- name: Make JBOSS config directory.
+  file:
+    path: /etc/jboss-as
+    state: directory
+
+- name: Create JBOSS service config.
+  template:
+    src: jboss-as.conf.j2
+    dest: /etc/jboss-as/jboss-as.conf
+
+- name: Create unit file for jboss.
+  template:
+    src: jboss.service.j2
+    dest: /etc/systemd/system/jboss.service
+
+- name: Reload systemd.
+  command: systemctl daemon-reload
+
+- name: Set permissions for JBOSS directory.
+  file:
+    path:  /opt/jboss
+    state: directory
+    owner: jboss
+    group: jboss
+    follow: yes
+
+- name: Start and enable JBOSS application server.
+  service:
+    name: jboss
+    state: restarted
+    enabled: yes
+
+- wait_for: port=9999 delay=1
+
+- name: Register MariaDB Java Connector.
+  command: /opt/jboss/bin/jboss-cli.sh -c /subsystem=datasources/jdbc-driver=org.mariadb.jdbc.Driver:add\(driver-name=org.mariadb.jdbc.Driver,driver-module-name=org.mariadb,driver-xa-datasource-class-name=org.mariadb.jdbc.MySQLDataSource\)
+
+- name: EJBCA ant deploy.
+  command: ant deploy
+  args:
+    chdir: /opt/ejbca
+  
+- name: EJBCA ant install.
+  command: ant install
+  args:
+    chdir: /opt/ejbca
