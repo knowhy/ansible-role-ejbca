@@ -150,6 +150,13 @@
     src: jboss-as.conf.j2
     dest: /etc/jboss-as/jboss-as.conf
 
+- name: Make JBOSS log directory.
+  file:
+    path: /var/log/jboss
+    state: directory
+    owner: jboss
+    group: jboss
+
 - name: Create unit file for jboss.
   template:
     src: jboss.service.j2
