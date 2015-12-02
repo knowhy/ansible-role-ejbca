@@ -12,3 +12,11 @@ ejbca_password_logrounds: 1
 ejbca_ca_name: ManagementCA
 ejbca_ca_keyspec: 4096
 ejbca_ca_org: "EJBCA Sample"
+
+ejbca_java_trustpassword: ejbca
+ejbca_superadmin_password: ejbca
+ejbca_httpsserver_password: ejbca
+
+ejbca_httpserver_pubhttp: 8080
+ejbca_httpserver_pubhttps: 8442
+ejbca_httpserver.privhttps: 8443

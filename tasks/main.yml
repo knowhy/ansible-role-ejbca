@@ -15,8 +15,6 @@
     - mariadb
     - mariadb-server
     - mariadb-libs
-#    - MariaDB-server
-#    - MariaDB-client
     - MySQL-python
 
 - name: Start and enable MariaDB server.
@@ -106,6 +104,11 @@
   template:
     src: database.properties.j2
     dest: /opt/ejbca/conf/database.properties
+
+- name: Configure web properties.
+  template:
+    src: web.properties.j2
+    dest: /opt/ejbca/conf/web.properties
 
 - name: Make JBOSS MariaDB Java Connector directory.
   file:
