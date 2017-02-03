@@ -1,7 +1,7 @@
 ---
 
 jboss_version: 7.1.1
-ejbca_version: 6_3_1_1
+ejbca_version: 6.3.1.1
 
 ejbca_mysql_password: ejbca
 
@@ -20,3 +20,5 @@ ejbca_httpsserver_password: ejbca
 ejbca_httpserver_pubhttp: 8080
 ejbca_httpserver_pubhttps: 8442
 ejbca_httpserver.privhttps: 8443
+
+mariadb_java_client_version: 1.3.2

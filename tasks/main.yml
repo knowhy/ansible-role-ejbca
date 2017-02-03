@@ -93,12 +93,12 @@
     recurse: True
 
 - stat:
-    path: /opt/jboss/modules/org/mariadb/main/mariadb-java-client-1.3.2.jar
+    path: "/opt/jboss/modules/org/mariadb/main/mariadb-java-client-{{ mariadb_java_client_version }}.jar"
   register: mariadb_connector
 
 - name: Download MariaDB Java Connector.
   get_url:
-    url: https://downloads.mariadb.com/enterprise/hvnn-wb2d/connectors/java/connector-java-1.3.2/mariadb-java-client-1.3.2.jar
+    url: "https://downloads.mariadb.com/enterprise/hvnn-wb2d/connectors/java/connector-java-1.3.2/mariadb-java-client-{{mariadb_java_client_version }}.jar"
     dest: /opt/jboss/modules/org/mariadb/main/
     validate_certs: False
     owner: jboss
