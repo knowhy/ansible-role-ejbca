@@ -26,7 +26,7 @@
 
 - name: Download EJBCA archive.
   get_url:
-    url: http://sourceforge.net/projects/ejbca/files/ejbca6/ejbca_6_3_1_1/ejbca_ce_6_3_1_1.zip
+    url: "http://sourceforge.net/projects/ejbca/files/ejbca6/ejbca_{{ ejbca_version | regex_replace('.','_') }}/ejbca_ce_{{ ejbca_version | regex_replace('.','_') }}.zip"
     dest: /opt/
 
 - name: Add JBOSS system user.
@@ -44,11 +44,11 @@
 
 - name: Unarchive EJBCA archive.
   unarchive:
-    src: /opt/ejbca_ce_6_3_1_1.zip
+    src: "/opt/ejbca_ce_{{ ejbca_version | regex_replace('.','_') }}.zip"
     dest: /opt/
     owner: jboss
     group: jboss
-    creates: /opt/ejbca_ce_6_3_1_1
+    creates: "/opt/ejbca_ce_{{ ejbca_version | regex_replace('.','_') }}"
 
 - name: Create symlink for /opt/jboss
   file:
@@ -60,7 +60,7 @@
 
 - name: Create symlink for /opt/ejbca
   file:
-    src: /opt/ejbca_ce_6_3_1_1
+    src: "/opt/ejbca_ce_{{ ejbca_version | regex_replace('.','_') }}"
     dest: /opt/ejbca
     state: link
     owner: jboss
