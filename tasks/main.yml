@@ -21,7 +21,7 @@
 
 - name: Download JBOSS AS archive.
   get_url:
-    url: "http://download.jboss.org/jbossas/7.1/jboss-as-{{ jboss_version }}.Final/jboss-as-{{ jboss_version }}.Final.zip"
+    url: "http://download.jboss.org/jbossas/{{ jboss_version.split('.')[0] }}.{{ jboss_version.split('.')[1] }}/jboss-as-{{ jboss_version }}.Final/jboss-as-{{ jboss_version }}.Final.zip"
     dest: /opt/
 
 - name: Download EJBCA archive.
@@ -52,7 +52,7 @@
 
 - name: Create symlink for /opt/jboss
   file:
-    src: /opt/jboss-as-7.1.1.Final
+    src: "/opt/jboss-as-{{ jboss_version }}.Final"
     dest: /opt/jboss
     state: link
     owner: jboss
