@@ -40,7 +40,7 @@
     dest: /opt/
     owner: jboss
     group: jboss
-    creates: /opt/jboss-as-7.1.1.Final
+    creates: "/opt/jboss-as-{{ jboss_version }}.Final"
 
 - name: Unarchive EJBCA archive.
   unarchive:
