@@ -32,7 +32,7 @@
 - name: Add JBOSS system user.
   user:
     name: jboss
-    system: yes
+    system: True
 
 - name: Unarchive JBOSS archive.
   unarchive:
@@ -86,11 +86,11 @@
     src: web.properties.j2
     dest: /opt/ejbca/conf/web.properties
 
-- name: Make JBOSS MariaDB Java Connector directory.
+- name: Ensure MariaDB Java Connector directory is present.
   file:
     path: /opt/jboss/modules/org/mariadb/main/
     state: directory
-    recurse: yes
+    recurse: True
 
 - stat:
     path: /opt/jboss/modules/org/mariadb/main/mariadb-java-client-1.3.2.jar
@@ -105,42 +105,45 @@
     group: jboss
   when: mariadb_connector.stat is not defined
 
-- name: Create JBOSS MariaDB Java Connector configuration.
+- name: Ensure MariaDB Java Connector configuration is present.
   template:
     src: modules.xml.j2
     dest: /opt/jboss/modules/org/mariadb/main/modules.xml
     owner: jboss
     group: jboss
 
-- name: Configure MariaDb connector in JBOSS.
+- name: Ensure MariaDb connector is configured in JBOSS.
   template:
     src: standalone.xml.j2
     dest: /opt/jboss/standalone/configuration/standalone.xml
 
-- name: Make JBOSS config directory.
+- name: Ensure JBOSS root directory is present.
   file:
     path: /etc/jboss-as
     state: directory
 
-- name: Create JBOSS service config.
+- name: Ensure JBOSS main configuration is present.
   template:
     src: jboss-as.conf.j2
     dest: /etc/jboss-as/jboss-as.conf
 
-- name: Make JBOSS log directory.
+- name: Ensure JBOSS log directory is present.
   file:
     path: /var/log/jboss
     state: directory
     owner: jboss
     group: jboss
 
-- name: Create unit file for jboss.
+- name: Ensure JBOSS unit file is present.
   template:
     src: jboss.service.j2
     dest: /etc/systemd/system/jboss.service
+  register: jboss_unit
 
 - name: Reload systemd.
-  command: systemctl daemon-reload
+  systemd:
+    name: jboss
+    daemon_reload: True
 
 - name: Set permissions for JBOSS directory.
   file:
@@ -148,13 +151,13 @@
     state: directory
     owner: jboss
     group: jboss
-    follow: yes
+    follow: True
 
 - name: Start and enable JBOSS application server.
   service:
     name: jboss
-    state: restarted
-    enabled: yes
+    state: started
+    enabled: True
 
 - wait_for:
     port: 9999
