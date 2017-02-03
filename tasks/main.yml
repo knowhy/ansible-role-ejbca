@@ -35,25 +35,15 @@
     priv: "*.*:ALL,GRANT"
     state: present
 
-- stat:
-    path: "/tmp/jboss-as-{{ jboss_version }}.Final.zip"
-  register: jboss_archive
-
 - name: Download JBOSS AS archive.
   get_url:
     url: "http://download.jboss.org/jbossas/7.1/jboss-as-{{ jboss_version }}.Final/jboss-as-{{ jboss_version }}.Final.zip"
-    dest: /tmp/
-  when: jboss_archive.stat is not defined
-
-- stat:
-    path: /tmp/ejbca_ce_6_3_1_1.zip
-  register: ejbca_archive
+    dest: /opt/
 
 - name: Download EJBCA archive.
   get_url:
     url: http://sourceforge.net/projects/ejbca/files/ejbca6/ejbca_6_3_1_1/ejbca_ce_6_3_1_1.zip
-    dest: /tmp/
-  when: ejbca_archive.stat is not defined
+    dest: /opt/
 
 - name: Add JBOSS system user.
   user:
@@ -62,7 +52,7 @@
 
 - name: Unarchive JBOSS archive.
   unarchive:
-    src: "/tmp/jboss-as-{{ jboss_version }}.Final.zip"
+    src: "/opt/jboss-as-{{ jboss_version }}.Final.zip"
     dest: /opt/
     owner: jboss
     group: jboss
@@ -70,7 +60,7 @@
 
 - name: Unarchive EJBCA archive.
   unarchive:
-    src: /tmp/ejbca_ce_6_3_1_1.zip
+    src: /opt/ejbca_ce_6_3_1_1.zip
     dest: /opt/
     owner: jboss
     group: jboss
