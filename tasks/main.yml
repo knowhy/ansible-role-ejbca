@@ -1,27 +1,11 @@
 ---
 
-- name: Configure MariaDB repository.
-  copy:
-    src: MariaDB.repo
-    dest: /etc/yum.repos.d/MariaDB.repo
-
 - name: Ensure required packages for EJBCA installation are present.
   yum:
     name: "{{ item }}"
     state: present
   with_items:
-    - java-1.7.0
     - ant.noarch
-    - mariadb
-    - mariadb-server
-    - mariadb-libs
-    - MySQL-python
-
-- name: Ensure MariaDB server is started and enabled.
-  service:
-    name: mariadb
-    state: started
-    enabled: True
 
 - name: Ensure database for EJBCA is present.
   mysql_db:

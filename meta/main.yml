@@ -16,4 +16,6 @@ galaxy_info:
 
   galaxy_tags: []
 
-dependencies: []
+dependencies:
+  - { role: geerlingguy.java, mysql_enabled_on_startup: yes }
+  - { role: geerlingguy.mysql }
